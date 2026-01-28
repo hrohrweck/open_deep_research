@@ -274,6 +274,25 @@ Models are specified as `provider:model-name`:
 
 ### Google
 - `google:gemini-2.0-flash` - Gemini 2.0 Flash
+- `google:gemini-1.5-pro` - Gemini 1.5 Pro
+
+### Z.AI / GLM Models (Chinese LLMs)
+- `zai:glm-4.7` - Latest GLM flagship model
+- `zai:glm-4.6` - Previous GLM flagship
+- `zai:glm-4-flash` - Fast GLM model
+
+### OpenRouter (Multiple Providers)
+- `openrouter:openai/gpt-4o` - GPT-4o via OpenRouter
+- `openrouter:anthropic/claude-3.5-sonnet` - Claude 3.5 Sonnet via OpenRouter
+- `openrouter:google/gemini-pro-1.5` - Gemini Pro 1.5 via OpenRouter
+- `openrouter:meta-llama/llama-3.1-405b-instruct` - Llama 3.1 405B via OpenRouter
+
+### Poe.com (Hundreds of Models)
+- `poe:GPT-4o` - GPT-4o via Poe
+- `poe:CL-3.5-Sonnet` - Claude 3.5 Sonnet via Poe
+- `poe:Gemini-1.5-Pro` - Gemini Pro 1.5 via Poe
+- `poe:DeepSeek-V3` - DeepSeek V3 via Poe
+- `poe:Grok-2` - xAI's Grok via Poe
 
 ## Search API Options
 

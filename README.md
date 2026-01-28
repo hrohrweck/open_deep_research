@@ -158,12 +158,49 @@ openrouter:deepseek/deepseek-coder
 
 > **Note:** [OpenRouter](https://openrouter.ai/) provides unified access to hundreds of AI models through a single API. Great for comparing models or accessing models not directly available in your region. [Documentation](https://openrouter.ai/docs/quickstart)
 
+###### Poe.com
+```bash
+# Set your API key in .env
+POE_API_KEY=...
+
+# Available models (use 'poe:' prefix - Poe uses model names directly)
+# GPT models via Poe
+poe:GPT-4o
+poe:GPT-4o-mini
+poe:GPT-4-turbo
+
+# Claude models via Poe
+poe:CL-3.5-Sonnet
+poe:CL-3.5-Haiku
+poe:CL-3-Opus
+
+# Google models via Poe
+poe:Gemini-1.5-Pro
+poe:Gemini-1.5-Flash
+
+# Meta Llama models via Poe
+poe:Llama-3.1-405B
+poe:Llama-3.1-70B
+
+# Mistral AI models via Poe
+poe:Mistral-Large
+
+# DeepSeek models via Poe
+poe:DeepSeek-V3
+
+# Other models via Poe
+poe:Grok-2        # xAI's Grok model
+```
+
+> **Note:** [Poe](https://poe.com/api) provides access to hundreds of AI models and bots through a single OpenAI-compatible API. Access frontier models from OpenAI, Anthropic, Google, xAI, and more with a single API key. [Documentation](https://creator.poe.com/docs/external-applications/openai-compatible-api)
+
 ##### Provider Selection Tips
 
 - **For best performance:** Use Claude Sonnet 4 or GPT-4.1
 - **For cost efficiency:** Use GPT-4.1-mini or Claude Haiku for summarization
 - **For Chinese language:** Use Z.AI GLM models
-- **For model variety:** Use OpenRouter to access multiple providers
+- **For model variety:** Use OpenRouter or Poe to access multiple providers
+- **For convenience:** Use Poe for unified access to hundreds of models with a single API key
 - **For local development:** Use Ollama (see [setup instructions](https://github.com/langchain-ai/open_deep_research/issues/65#issuecomment-2743586318))
 
 #### Search API :mag:

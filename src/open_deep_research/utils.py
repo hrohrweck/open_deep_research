@@ -82,9 +82,10 @@ async def tavily_search(
     max_char_to_include = configurable.max_content_length
 
     # Initialize summarization model with retry logic
-    # Check if this is a Z.AI or OpenRouter model (OpenAI-compatible)
+    # Check if this is a Z.AI, OpenRouter, or Poe model (OpenAI-compatible)
     is_zai_model = configurable.summarization_model.lower().startswith("zai:")
     is_openrouter_model = configurable.summarization_model.lower().startswith("openrouter:")
+    is_poe_model = configurable.summarization_model.lower().startswith("poe:")
 
     if is_zai_model:
         # Extract the actual model name (e.g., "zai:glm-4.7" -> "glm-4.7")
@@ -106,6 +107,17 @@ async def tavily_search(
             "max_tokens": configurable.summarization_model_max_tokens,
             "api_key": get_api_key_for_model(configurable.summarization_model, config),
             "base_url": "https://openrouter.ai/api/v1",  # OpenRouter endpoint
+            "tags": ["langsmith:nostream"]
+        }
+    elif is_poe_model:
+        # Extract the actual model name (e.g., "poe:GPT-4o" -> "GPT-4o")
+        actual_model_name = configurable.summarization_model.split(":", 1)[1] if ":" in configurable.summarization_model else configurable.summarization_model
+        summarization_model_config = {
+            "model": actual_model_name,
+            "model_provider": "openai",  # Use OpenAI provider for Poe compatibility
+            "max_tokens": configurable.summarization_model_max_tokens,
+            "api_key": get_api_key_for_model(configurable.summarization_model, config),
+            "base_url": "https://api.poe.com/v1",  # Poe endpoint
             "tags": ["langsmith:nostream"]
         }
     else:
@@ -844,6 +856,21 @@ MODEL_TOKEN_LIMITS = {
     "openrouter:mistralai/mistral-small": 32000,
     "openrouter:deepseek/deepseek-chat": 128000,
     "openrouter:deepseek/deepseek-coder": 128000,
+    # Poe Models (hundreds of models available via Poe platform)
+    # Poe uses model names directly without provider prefix
+    "poe:GPT-4o": 128000,
+    "poe:GPT-4o-mini": 128000,
+    "poe:GPT-4-turbo": 128000,
+    "poe:CL-3.5-Sonnet": 200000,
+    "poe:CL-3.5-Haiku": 200000,
+    "poe:CL-3-Opus": 200000,
+    "poe:Gemini-1.5-Pro": 2800000,
+    "poe:Gemini-1.5-Flash": 1048576,
+    "poe:Llama-3.1-405B": 131072,
+    "poe:Llama-3.1-70B": 131072,
+    "poe:Mistral-Large": 128000,
+    "poe:DeepSeek-V3": 128000,
+    "poe:Grok-2": 128000,
     "openai:gpt-4.1-mini": 1047576,
     "openai:gpt-4.1-nano": 1047576,
     "openai:gpt-4.1": 1047576,
@@ -965,6 +992,8 @@ def get_api_key_for_model(model_name: str, config: RunnableConfig):
             return api_keys.get("ZAI_API_KEY")
         elif model_name.startswith("openrouter:"):
             return api_keys.get("OPENROUTER_API_KEY")
+        elif model_name.startswith("poe:"):
+            return api_keys.get("POE_API_KEY")
         return None
     else:
         if model_name.startswith("openai:"):
@@ -977,6 +1006,8 @@ def get_api_key_for_model(model_name: str, config: RunnableConfig):
             return os.getenv("ZAI_API_KEY")
         elif model_name.startswith("openrouter:"):
             return os.getenv("OPENROUTER_API_KEY")
+        elif model_name.startswith("poe:"):
+            return os.getenv("POE_API_KEY")
         return None
 
 def build_model_config(
@@ -996,9 +1027,10 @@ def build_model_config(
     Returns:
         Dictionary with model configuration parameters
     """
-    # Check if this is a Z.AI or OpenRouter model (OpenAI-compatible)
+    # Check if this is a Z.AI, OpenRouter, or Poe model (OpenAI-compatible)
     is_zai_model = model_name.lower().startswith("zai:")
     is_openrouter_model = model_name.lower().startswith("openrouter:")
+    is_poe_model = model_name.lower().startswith("poe:")
 
     # For Z.AI models, strip the prefix and use OpenAI provider with custom base URL
     if is_zai_model:
@@ -1021,6 +1053,18 @@ def build_model_config(
             "max_tokens": max_tokens,
             "api_key": get_api_key_for_model(model_name, config),
             "base_url": "https://openrouter.ai/api/v1",  # OpenRouter endpoint
+            "tags": (extra_tags or []) + ["langsmith:nostream"]
+        }
+    elif is_poe_model:
+        # Extract the actual model name (e.g., "poe:GPT-4o" -> "GPT-4o")
+        # Poe uses model names directly without provider prefix
+        actual_model_name = model_name.split(":", 1)[1] if ":" in model_name else model_name
+        model_config = {
+            "model": actual_model_name,
+            "model_provider": "openai",  # Use OpenAI provider for Poe compatibility
+            "max_tokens": max_tokens,
+            "api_key": get_api_key_for_model(model_name, config),
+            "base_url": "https://api.poe.com/v1",  # Poe endpoint
             "tags": (extra_tags or []) + ["langsmith:nostream"]
         }
     else:
