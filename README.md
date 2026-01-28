@@ -61,7 +61,7 @@ Ask a question in the `messages` input field and click `Submit`. Select differen
 
 #### LLM :brain:
 
-Open Deep Research supports a wide range of LLM providers via the [init_chat_model() API](https://python.langchain.com/docs/how_to/chat_models_universal_init/). It uses LLMs for a few different tasks. See the below model fields in the [configuration.py](https://github.com/langchain-ai/open_deep_research/blob/main/src/open_deep_research/configuration.py) file for more details. This can be accessed via the LangGraph Studio UI. 
+Open Deep Research supports a wide range of LLM providers via the [init_chat_model() API](https://python.langchain.com/docs/how_to/chat_models_universal_init/). It uses LLMs for a few different tasks. See the below model fields in the [configuration.py](https://github.com/langchain-ai/open_deep_research/blob/main/src/open_deep_research/configuration.py) file for more details. This can be accessed via the LangGraph Studio UI.
 
 - **Summarization** (default: `openai:gpt-4.1-mini`): Summarizes search API results
 - **Research** (default: `openai:gpt-4.1`): Power the search agent
@@ -70,7 +70,101 @@ Open Deep Research supports a wide range of LLM providers via the [init_chat_mod
 
 > Note: the selected model will need to support [structured outputs](https://python.langchain.com/docs/integrations/chat/) and [tool calling](https://python.langchain.com/docs/how_to/tool_calling/).
 
-> Note: For OpenRouter: Follow [this guide](https://github.com/langchain-ai/open_deep_research/issues/75#issuecomment-2811472408) and for local models via Ollama  see [setup instructions](https://github.com/langchain-ai/open_deep_research/issues/65#issuecomment-2743586318).
+##### Supported Providers
+
+###### OpenAI
+```bash
+# Set your API key in .env
+OPENAI_API_KEY=sk-...
+
+# Available models
+openai:gpt-4.1
+openai:gpt-4.1-mini
+openai:gpt-4o
+openai:gpt-4o-mini
+```
+
+###### Anthropic Claude
+```bash
+# Set your API key in .env
+ANTHROPIC_API_KEY=sk-ant-...
+
+# Available models
+anthropic:claude-opus-4
+anthropic:claude-sonnet-4
+anthropic:claude-3-5-sonnet
+anthropic:claude-3-5-haiku
+```
+
+###### Google Gemini
+```bash
+# Set your API key in .env
+GOOGLE_API_KEY=...
+
+# Available models
+google:gemini-2.0-flash
+google:gemini-1.5-pro
+google:gemini-1.5-flash
+```
+
+###### Z.AI / GLM Models
+```bash
+# Set your API key in .env
+ZAI_API_KEY=...
+
+# Available models (use 'zai:' prefix)
+zai:glm-4.7         # Latest flagship model
+zai:glm-4.6         # Previous flagship
+zai:glm-4.5         # Foundation model
+zai:glm-4-flash     # Fast model
+zai:glm-4-plus      # Enhanced model
+zai:glm-4-air       # Lightweight model
+zai:glm-4.6v        # Vision model
+```
+
+> **Note:** Z.AI (智谱AI) provides Chinese LLMs with OpenAI-compatible API. The GLM series offers strong performance at competitive pricing. [Documentation](https://docs.z.ai/)
+
+###### OpenRouter
+```bash
+# Set your API key in .env
+OPENROUTER_API_KEY=sk-or-...
+
+# Available models (use 'openrouter:' prefix)
+# OpenAI models via OpenRouter
+openrouter:openai/gpt-4o
+openrouter:openai/gpt-4o-mini
+
+# Anthropic models via OpenRouter
+openrouter:anthropic/claude-3.5-sonnet
+openrouter:anthropic/claude-3-opus
+openrouter:anthropic/claude-3-haiku
+
+# Google models via OpenRouter
+openrouter:google/gemini-pro-1.5
+openrouter:google/gemini-flash-1.5
+
+# Meta Llama models via OpenRouter
+openrouter:meta-llama/llama-3.1-405b-instruct
+openrouter:meta-llama/llama-3.1-70b-instruct
+
+# Mistral AI models via OpenRouter
+openrouter:mistralai/mistral-large
+openrouter:mistralai/mistral-medium
+
+# DeepSeek models via OpenRouter
+openrouter:deepseek/deepseek-chat
+openrouter:deepseek/deepseek-coder
+```
+
+> **Note:** [OpenRouter](https://openrouter.ai/) provides unified access to hundreds of AI models through a single API. Great for comparing models or accessing models not directly available in your region. [Documentation](https://openrouter.ai/docs/quickstart)
+
+##### Provider Selection Tips
+
+- **For best performance:** Use Claude Sonnet 4 or GPT-4.1
+- **For cost efficiency:** Use GPT-4.1-mini or Claude Haiku for summarization
+- **For Chinese language:** Use Z.AI GLM models
+- **For model variety:** Use OpenRouter to access multiple providers
+- **For local development:** Use Ollama (see [setup instructions](https://github.com/langchain-ai/open_deep_research/issues/65#issuecomment-2743586318))
 
 #### Search API :mag:
 
@@ -131,6 +225,91 @@ We've deployed Open Deep Research to our public demo instance of OAP. All you ne
 You can also deploy your own instance of OAP, and make your own custom agents (like Deep Researcher) available on it to your users.
 1. [Deploy Open Agent Platform](https://docs.oap.langchain.com/quickstart)
 2. [Add Deep Researcher to OAP](https://docs.oap.langchain.com/setup/agents)
+
+#### OpenWebUI Integration
+
+OpenWebUI is an open-source AI interface that you can self-host. Open Deep Research includes a custom pipeline for seamless integration with OpenWebUI, allowing you to use the deep research agent directly from the OpenWebUI chat interface.
+
+**Architecture:**
+```
+┌─────────────────────┐         ┌─────────────────────────┐
+│                     │         │                         │
+│      OpenWebUI      │────────▶│   Open Deep Research    │
+│                     │         │    (LangGraph API)      │
+│   Your Browser      │         │                         │
+│                     │         │   Container Name:       │
+│                     │         │   open-deep-research    │
+└─────────────────────┘         └─────────────────────────┘
+          │                               │
+          └───────────┬───────────────────┘
+                      │
+              Docker Network
+               (webui-net)
+```
+
+**Quick Start:**
+
+1. **Deploy Open Deep Research with Docker:**
+```bash
+cd open_deep_research
+
+# Configure your API keys in .env
+cp .env.example .env
+# Edit .env with your API keys
+
+# Deploy with Docker Compose
+docker-compose up -d --build
+
+# Verify it's running
+docker logs -f open-deep-research
+```
+
+2. **Ensure Network Connectivity:**
+```bash
+# Check your OpenWebUI network name
+docker network ls | grep -i webui
+
+# If different from 'webui-net', update EXTERNAL_NETWORK in .env
+```
+
+3. **Install the Pipeline in OpenWebUI:**
+- Open OpenWebUI in your browser
+- Log in as an administrator
+- Go to **Admin Panel** → **Settings** → **Pipelines**
+- Click **"+"** → **"Upload from file"**
+- Select: `pipelines/deep_research_pipeline.py`
+- Click **Save**
+
+4. **Use Deep Research:**
+- Start a new chat in OpenWebUI
+- Select **"Deep Research"** from the model dropdown
+- Enter your research query
+- Wait for the comprehensive research report (1-5 minutes)
+
+**Configuration:**
+
+The pipeline exposes configurable "Valves" in the OpenWebUI admin panel:
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `LANGGRAPH_URL` | `http://open-deep-research:2024` | LangGraph server URL |
+| `RESEARCH_MODEL` | `anthropic:claude-sonnet-4-20250514` | Model for research |
+| `SEARCH_API` | `tavily` | Search provider: `tavily`, `openai`, `anthropic`, `none` |
+| `MAX_CONCURRENT_RESEARCH_UNITS` | `5` | Parallel sub-agents |
+| `MAX_RESEARCHER_ITERATIONS` | `6` | Research depth |
+
+**Supported Models via Pipeline:**
+
+All providers documented above are supported in OpenWebUI:
+- OpenAI: `openai:gpt-4.1`, `openai:gpt-4o`, etc.
+- Anthropic: `anthropic:claude-sonnet-4`, `anthropic:claude-opus-4`, etc.
+- Google: `google:gemini-2.0-flash`, etc.
+- Z.AI: `zai:glm-4.7`, `zai:glm-4.6`, etc.
+- OpenRouter: `openrouter:openai/gpt-4o`, `openrouter:anthropic/claude-3.5-sonnet`, etc.
+
+**For detailed setup, configuration, and troubleshooting, see:**
+- [pipelines/README.openwebui.md](pipelines/README.openwebui.md) - Comprehensive integration guide
+- [pipelines/deep_research_pipeline.py](pipelines/deep_research_pipeline.py) - Pipeline implementation
 
 ### Legacy Implementations 🏛️
 
