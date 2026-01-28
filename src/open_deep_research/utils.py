@@ -82,8 +82,9 @@ async def tavily_search(
     max_char_to_include = configurable.max_content_length
 
     # Initialize summarization model with retry logic
-    # Check if this is a Z.AI model (OpenAI-compatible)
+    # Check if this is a Z.AI or OpenRouter model (OpenAI-compatible)
     is_zai_model = configurable.summarization_model.lower().startswith("zai:")
+    is_openrouter_model = configurable.summarization_model.lower().startswith("openrouter:")
 
     if is_zai_model:
         # Extract the actual model name (e.g., "zai:glm-4.7" -> "glm-4.7")
@@ -94,6 +95,17 @@ async def tavily_search(
             "max_tokens": configurable.summarization_model_max_tokens,
             "api_key": get_api_key_for_model(configurable.summarization_model, config),
             "base_url": "https://api.z.ai/api/paas/v4/",  # Z.AI endpoint
+            "tags": ["langsmith:nostream"]
+        }
+    elif is_openrouter_model:
+        # Extract the actual model name (e.g., "openrouter:openai/gpt-4o" -> "openai/gpt-4o")
+        actual_model_name = configurable.summarization_model.split(":", 1)[1] if ":" in configurable.summarization_model else configurable.summarization_model
+        summarization_model_config = {
+            "model": actual_model_name,
+            "model_provider": "openai",  # Use OpenAI provider for OpenRouter compatibility
+            "max_tokens": configurable.summarization_model_max_tokens,
+            "api_key": get_api_key_for_model(configurable.summarization_model, config),
+            "base_url": "https://openrouter.ai/api/v1",  # OpenRouter endpoint
             "tags": ["langsmith:nostream"]
         }
     else:
@@ -813,6 +825,25 @@ MODEL_TOKEN_LIMITS = {
     "zai:glm-4-plus": 128000,
     "zai:glm-4-air": 128000,
     "zai:glm-4.6v": 128000,
+    # OpenRouter Models (uses provider/model format)
+    "openrouter:openai/gpt-4o": 128000,
+    "openrouter:openai/gpt-4o-mini": 128000,
+    "openrouter:openai/gpt-4-turbo": 128000,
+    "openrouter:openai/gpt-4": 8192,
+    "openrouter:openai/gpt-3.5-turbo": 16385,
+    "openrouter:anthropic/claude-3.5-sonnet": 200000,
+    "openrouter:anthropic/claude-3-opus": 200000,
+    "openrouter:anthropic/claude-3-haiku": 200000,
+    "openrouter:google/gemini-pro-1.5": 2800000,
+    "openrouter:google/gemini-flash-1.5": 2800000,
+    "openrouter:meta-llama/llama-3.1-405b-instruct": 131072,
+    "openrouter:meta-llama/llama-3.1-70b-instruct": 131072,
+    "openrouter:meta-llama/llama-3.1-8b-instruct": 131072,
+    "openrouter:mistralai/mistral-large": 128000,
+    "openrouter:mistralai/mistral-medium": 32000,
+    "openrouter:mistralai/mistral-small": 32000,
+    "openrouter:deepseek/deepseek-chat": 128000,
+    "openrouter:deepseek/deepseek-coder": 128000,
     "openai:gpt-4.1-mini": 1047576,
     "openai:gpt-4.1-nano": 1047576,
     "openai:gpt-4.1": 1047576,
@@ -932,6 +963,8 @@ def get_api_key_for_model(model_name: str, config: RunnableConfig):
             return api_keys.get("GOOGLE_API_KEY")
         elif model_name.startswith("zai:"):
             return api_keys.get("ZAI_API_KEY")
+        elif model_name.startswith("openrouter:"):
+            return api_keys.get("OPENROUTER_API_KEY")
         return None
     else:
         if model_name.startswith("openai:"):
@@ -942,6 +975,8 @@ def get_api_key_for_model(model_name: str, config: RunnableConfig):
             return os.getenv("GOOGLE_API_KEY")
         elif model_name.startswith("zai:"):
             return os.getenv("ZAI_API_KEY")
+        elif model_name.startswith("openrouter:"):
+            return os.getenv("OPENROUTER_API_KEY")
         return None
 
 def build_model_config(
@@ -961,8 +996,9 @@ def build_model_config(
     Returns:
         Dictionary with model configuration parameters
     """
-    # Check if this is a Z.AI model (OpenAI-compatible)
+    # Check if this is a Z.AI or OpenRouter model (OpenAI-compatible)
     is_zai_model = model_name.lower().startswith("zai:")
+    is_openrouter_model = model_name.lower().startswith("openrouter:")
 
     # For Z.AI models, strip the prefix and use OpenAI provider with custom base URL
     if is_zai_model:
@@ -974,6 +1010,17 @@ def build_model_config(
             "max_tokens": max_tokens,
             "api_key": get_api_key_for_model(model_name, config),
             "base_url": "https://api.z.ai/api/paas/v4/",  # Z.AI endpoint
+            "tags": (extra_tags or []) + ["langsmith:nostream"]
+        }
+    elif is_openrouter_model:
+        # Extract the actual model name (e.g., "openrouter:openai/gpt-4o" -> "openai/gpt-4o")
+        actual_model_name = model_name.split(":", 1)[1] if ":" in model_name else model_name
+        model_config = {
+            "model": actual_model_name,
+            "model_provider": "openai",  # Use OpenAI provider for OpenRouter compatibility
+            "max_tokens": max_tokens,
+            "api_key": get_api_key_for_model(model_name, config),
+            "base_url": "https://openrouter.ai/api/v1",  # OpenRouter endpoint
             "tags": (extra_tags or []) + ["langsmith:nostream"]
         }
     else:
