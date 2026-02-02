@@ -1,5 +1,8 @@
 # 🔬 Open Deep Research
 
+!THIS IS NOT THE OFFICIAL REPOSITORY AND CONTAINS POORLY TESTED MODIFICATIONS!
+Official repository: https://github.com/langchain-ai/open_deep_research
+
 <img width="1388" height="298" alt="full_diagram" src="https://github.com/user-attachments/assets/12a2371b-8be2-4219-9b48-90503eb43c69" />
 
 Deep research has broken out as one of the most popular agent applications. This is a simple, configurable, fully open source deep research agent that works across many model providers, search tools, and MCP servers. It's performance is on par with many popular deep research agents ([see Deep Research Bench leaderboard](https://huggingface.co/spaces/Ayanami0730/DeepResearch-Leaderboard)).
